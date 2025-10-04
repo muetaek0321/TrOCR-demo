@@ -1,0 +1,13 @@
+output_path = "./results"
+gpu = 0
+
+[model]
+encoder_name = "facebook/deit-base-distilled-patch16-224"
+decoder_name = "rinna/japanese-gpt2-xsmall"
+
+[parameters]
+num_epoches = 100
+batch_size = 8
+
+[optimizer]
+lr = 1e-4

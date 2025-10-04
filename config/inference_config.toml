@@ -1,0 +1,3 @@
+train_result_path = "results/TrOCR_2025-10-04_17-09-39"
+input_path = "./test_data/annotations.csv"
+gpu = 0
