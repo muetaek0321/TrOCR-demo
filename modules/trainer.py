@@ -49,7 +49,7 @@ class Trainer:
         
         if resume_checkpoint is None:
             # 新規モデル作成
-            self.log = {"epoch": [], "train_loss": [], "val_cer": []}
+            self.log = {"epoch": [], "train_loss": [], "val_loss": [], "val_cer": []}
             self.best_metric = np.inf
         else:
             # 途中再開
@@ -120,27 +120,34 @@ class Trainer:
         """
         self.model.eval()
         self.optimizer.eval()
+        iter_val_loss = []
         iter_val_cer = []
         
         for batch in tqdm(self.val_dataloader, desc="val"):
+            for k, v in batch.items():
+                batch[k] = v.to(self.device)
 
             with torch.no_grad():
-                inputs = batch["pixel_values"].to(self.device)
-                outputs = self.model.generate(inputs)
-                
-            cer = self.compute_cer(pred_ids=outputs, label_ids=batch["labels"])
-            iter_val_cer.append(cer)
+                outputs = self.model(**batch)
+                gen_outputs = self.model.generate(batch["pixel_values"])
             
+            iter_val_loss.append(outputs.loss.item())
+            cer = self.compute_cer(pred_ids=gen_outputs, label_ids=batch["labels"])
+            iter_val_cer.append(cer)
+        
+        # 1epochの平均lossを計算
+        epoch_val_loss = np.mean(iter_val_loss)
+        self.log["val_loss"].append(epoch_val_loss)
         # 1epochの平均Character Error Rateを計算
         epoch_val_cer = np.mean(iter_val_cer)
         self.log["val_cer"].append(epoch_val_cer)
         
         # 最良のLossを判定
-        if self.best_metric > epoch_val_cer:
-            self.best_metric = epoch_val_cer
+        if self.best_metric > epoch_val_loss:
+            self.best_metric = epoch_val_loss
             self.save_weight(model_name=f"model_best.pth")
             
-        return epoch_val_cer
+        return epoch_val_loss, epoch_val_cer, 
         
     def save_weight(
         self,
@@ -167,6 +174,7 @@ class Trainer:
         ax1 = fig.add_subplot(1, 2, 1)
         ax1.set_title(f"Loss (Epoch:{epoch})")
         ax1.plot(self.log["epoch"], self.log["train_loss"], c='red', label='train')
+        ax1.plot(self.log["epoch"], self.log["val_loss"], c='blue', label='val')
         ax1.set_xlabel('Epoch')
         ax1.set_ylabel('Loss')
         ax1.legend()
