@@ -128,11 +128,12 @@ def train(
         # 訓練
         train_loss = trainer.train(epoch)
         # 検証
-        val_cer = trainer.validation(epoch)
+        val_loss, val_cer = trainer.validation(epoch)
         
         # ログの標準出力
         print(f"Epoch:{epoch}")
-        print(f"  Loss:{train_loss:.4f}")
+        print(f"  Train Loss:{train_loss:.4f}")
+        print(f"  Validation Loss:{val_loss:.4f}")
         print(f"  Score(Character Error Rate):{val_cer:.4f}")
         
         # 学習の進捗を出力

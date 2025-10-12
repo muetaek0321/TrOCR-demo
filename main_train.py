@@ -22,8 +22,8 @@ from modules.trainer import Trainer
 # 定数
 CONFIG_PATH = Path("./config/train_config.toml")
 DATASET_DIR = Path("./dataset")
-
     
+
 def train() -> None:
     # 乱数の固定
     fix_seeds()
@@ -59,7 +59,7 @@ def train() -> None:
     dataset_df = dataset_df.sample(frac=1, random_state=42, ignore_index=True)
     
     # 前処理
-    image_processor = AutoImageProcessor.from_pretrained(encoder_name)
+    image_processor = AutoImageProcessor.from_pretrained("microsoft/trocr-small-printed", do_resize=False)
     tokenizer = AutoTokenizer.from_pretrained(decoder_name)
     processor = TrOCRProcessor(image_processor, tokenizer)
     
@@ -79,7 +79,6 @@ def train() -> None:
                                   num_workers=0, pin_memory=True)
     val_dataloader = DataLoader(val_dataset, batch_size=1, shuffle=False, 
                                 num_workers=0, pin_memory=True)
-    
     # モデルの定義
     model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder_name, decoder_name)
     # モデルのコンフィグの設定

@@ -55,7 +55,7 @@ class Trainer:
             # 途中再開
             log_df = pd.read_csv(self.output_path.joinpath("training_log.csv"))
             self.log = log_df.to_dict(orient="list")
-            self.best_metric = log_df["val_cer"].min()
+            self.best_metric = log_df["val_loss"].min()
             
             # 読み込んだoptimizerのstateをGPUに渡す
             for state in self.optimizer.state.values():

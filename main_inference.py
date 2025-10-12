@@ -53,7 +53,6 @@ def inferece():
     processor = TrOCRProcessor(image_processor, tokenizer)
     
     # モデルの定義
-    # モデルの定義
     with open(result_path.joinpath("config.json"), mode="r", encoding="utf-8") as f:
         model_config_dict = json.load(f)
         model_config = VisionEncoderDecoderConfig(**model_config_dict)
@@ -70,8 +69,8 @@ def inferece():
     model.config.num_beams = 4
     
     # 作成したモデルの読み込み
-    checkpoint = torch.load(result_path.joinpath("model_latest.pth"), map_location=device)
-    # checkpoint = torch.load(result_path.joinpath("model_best.pth"), map_location=device)
+    # checkpoint = torch.load(result_path.joinpath("model_latest.pth"), map_location=device)
+    checkpoint = torch.load(result_path.joinpath("model_best.pth"), map_location=device)
     model.load_state_dict(checkpoint["model"])
     
     # 推論クラスの定義

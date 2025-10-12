@@ -2,11 +2,13 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import albumentations as A
 import torch
 from torch.utils.data import Dataset
 from PIL import Image
-
 from transformers import TrOCRProcessor
+
+from .augmentation import get_transform
 
 
 __all__ = ["OCRDataset"]
@@ -23,19 +25,37 @@ class OCRDataset(Dataset):
         max_target_length: int = 128,
         phase: str = "test"
     ) -> None:
-        """
-        
-        Args:
-            img_path_list (list): 画像パスのリスト
-            label_list (list): ラベルのリスト
-            input_size (list): 入力画像サイズ
-            phase (str): データセットの種類
-        """
         self.dataset_df = dataset_df
         self.dataset_dir = Path(dataset_dir)
         self.processor = processor
         self.max_target_length = max_target_length
         self.phase = phase
+        
+        # DataAugmentationの準備
+        self.tramsform = get_transform(phase)
+        
+        # 学習時のみデータセット追加
+        if phase == "train":
+            self.load_additional_dataset()
+        
+    def load_additional_dataset(
+        self
+    ) -> None:
+        """データセットの追加読み込み
+        """
+        # dataset = load_dataset("deepcopy/japanese-synthetic-ocr-150k")["train"]
+        # base_path = Path(r"C:\Users\masaki\Desktop\Python\sus_ocr\trocr\add_dataset")
+        # add_data = {"img": [], "text": []}
+        # for i, data in enumerate(dataset):
+        #     if i == 30097: continue
+        #     img_path = base_path.joinpath(f"{i}-"+data["string"]+".png")
+        #     add_data["img"].append(str(img_path))
+        #     add_data["text"].append(data["string"])
+        # add_df = pd.DataFrame(add_data)
+        # add_df.to_csv("./add_dataset/annotations.csv", encoding="utf-8-sig", index=False)
+          
+        add_df = pd.read_csv("./add_dataset/annotations.csv", encoding="utf-8-sig")
+        self.dataset_df = pd.concat([self.dataset_df, add_df])
         
     def __len__(
         self
@@ -62,6 +82,9 @@ class OCRDataset(Dataset):
         
         # 画像読み込み
         img = Image.open(self.dataset_dir.joinpath(img_name)).convert("RGB")
+        
+        # DataAugmentationの適用
+        img = self.tramsform(image=np.array(img))["image"]
             
         # 前処理の適用
         pixel_values = self.processor(
