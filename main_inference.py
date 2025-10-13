@@ -12,7 +12,7 @@ from transformers import (
     TrOCRProcessor, VisionEncoderDecoderModel, VisionEncoderDecoderConfig
 )
 
-from modules.Inference import Inference
+from modules.inference import Inference
 from modules.utils import fix_seeds
 
 
