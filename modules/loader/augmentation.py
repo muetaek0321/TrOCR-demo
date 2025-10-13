@@ -132,17 +132,17 @@ def get_transform(
             A.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.2, p=0.5),
             A.CLAHE(p=0.2),
             A.ImageCompression(p=0.3),
-            SafeRotate(),
-            RandomPad(),
-            A.PadIfNeeded(224, 224, fill=0),
-            A.Resize(224, 224),
+            # SafeRotate(),
+            # RandomPad(),
+            # A.PadIfNeeded(224, 224, fill=0),
+            # A.Resize(224, 224),
             # A.Normalize(mean=0.5, std=0.5),
             # ToTensorV2()
         ]
     else:
         aug_list = [
-            A.PadIfNeeded(224, 224, fill=0),
-            A.Resize(224, 224),
+            # A.PadIfNeeded(224, 224, fill=0),
+            # A.Resize(224, 224),
             # A.Normalize(mean=0.5, std=0.5),
             # ToTensorV2()
         ]

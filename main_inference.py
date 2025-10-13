@@ -44,13 +44,10 @@ def inferece():
     # 学習時のconfigから必要なパラメータを取得
     with open(result_path.joinpath("train_config.toml"), mode="r", encoding="utf-8") as f:
         cfg_t = toml.load(f)
-    encoder_name = cfg_t["model"]["encoder_name"]
-    decoder_name = cfg_t["model"]["decoder_name"]
+    model_name = cfg_t["model"]["model_name"]
     
     # 前処理
-    image_processor = AutoImageProcessor.from_pretrained(encoder_name)
-    tokenizer = AutoTokenizer.from_pretrained(decoder_name)
-    processor = TrOCRProcessor(image_processor, tokenizer)
+    processor = TrOCRProcessor.from_pretrained(model_name)
     
     # モデルの定義
     with open(result_path.joinpath("config.json"), mode="r", encoding="utf-8") as f:
@@ -93,7 +90,7 @@ def inferece():
     
     # 検出結果を追加して結果出力
     test_df["pred"] = preds
-    test_df.to_csv(result_path.joinpath("inference_result.csv"), encoding="cp932", index=False)
+    test_df.to_csv(result_path.joinpath("inference_result.csv"), encoding="utf-8-sig", index=False)
         
 
 if __name__ == "__main__":

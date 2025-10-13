@@ -37,8 +37,7 @@ def train() -> None:
     output_path.mkdir(parents=True, exist_ok=True)
     
     ## モデル名
-    encoder_name = cfg["model"]["encoder_name"]
-    decoder_name = cfg["model"]["decoder_name"]
+    model_name = cfg["model"]["model_name"]
     
     ## 各種パラメータ
     num_epoches = cfg["parameters"]["num_epoches"]
@@ -59,9 +58,7 @@ def train() -> None:
     dataset_df = dataset_df.sample(frac=1, random_state=42, ignore_index=True)
     
     # 前処理
-    image_processor = AutoImageProcessor.from_pretrained("microsoft/trocr-small-printed", do_resize=False)
-    tokenizer = AutoTokenizer.from_pretrained(decoder_name)
-    processor = TrOCRProcessor(image_processor, tokenizer)
+    processor = TrOCRProcessor.from_pretrained(model_name)
     
     # Datasetの作成
     train_dataset = OCRDataset(
@@ -80,14 +77,15 @@ def train() -> None:
     val_dataloader = DataLoader(val_dataset, batch_size=1, shuffle=False, 
                                 num_workers=0, pin_memory=True)
     # モデルの定義
-    model = VisionEncoderDecoderModel.from_encoder_decoder_pretrained(encoder_name, decoder_name)
+    model = VisionEncoderDecoderModel.from_pretrained(model_name)
     # モデルのコンフィグの設定
+    model.config.decoder.is_decoder = True
+    model.config.decoder.add_cross_attention = True
     model.config.decoder_start_token_id = processor.tokenizer.cls_token_id
+    model.config.vocab_size = model.config.decoder.vocab_size = processor.tokenizer.vocab_size
     model.config.pad_token_id = processor.tokenizer.pad_token_id
-    model.config.vocab_size = model.config.decoder.vocab_size
     model.config.eos_token_id = processor.tokenizer.sep_token_id
     model.config.max_length = 64
-    model.config.early_stopping = True
     model.config.no_repeat_ngram_size = 3
     model.config.length_penalty = 2.0
     model.config.num_beams = 4

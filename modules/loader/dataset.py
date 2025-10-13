@@ -43,17 +43,6 @@ class OCRDataset(Dataset):
     ) -> None:
         """データセットの追加読み込み
         """
-        # dataset = load_dataset("deepcopy/japanese-synthetic-ocr-150k")["train"]
-        # base_path = Path(r"C:\Users\masaki\Desktop\Python\sus_ocr\trocr\add_dataset")
-        # add_data = {"img": [], "text": []}
-        # for i, data in enumerate(dataset):
-        #     if i == 30097: continue
-        #     img_path = base_path.joinpath(f"{i}-"+data["string"]+".png")
-        #     add_data["img"].append(str(img_path))
-        #     add_data["text"].append(data["string"])
-        # add_df = pd.DataFrame(add_data)
-        # add_df.to_csv("./add_dataset/annotations.csv", encoding="utf-8-sig", index=False)
-          
         add_df = pd.read_csv("./add_dataset/annotations.csv", encoding="utf-8-sig")
         self.dataset_df = pd.concat([self.dataset_df, add_df])
         

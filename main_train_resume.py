@@ -41,8 +41,7 @@ def train(
         cfg = toml.load(f)
     
     ## モデル名
-    encoder_name = cfg["model"]["encoder_name"]
-    decoder_name = cfg["model"]["decoder_name"]
+    model_name = cfg["model"]["model_name"]
     
     ## 各種パラメータ
     num_epoches = cfg["parameters"]["num_epoches"]
@@ -63,9 +62,7 @@ def train(
     dataset_df = dataset_df.sample(frac=1, random_state=42, ignore_index=True)
     
     # 前処理
-    image_processor = AutoImageProcessor.from_pretrained(encoder_name)
-    tokenizer = AutoTokenizer.from_pretrained(decoder_name)
-    processor = TrOCRProcessor(image_processor, tokenizer)
+    processor = TrOCRProcessor.from_pretrained(model_name)
     
     # Datasetの作成
     train_dataset = OCRDataset(
