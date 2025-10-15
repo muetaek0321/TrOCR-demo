@@ -55,7 +55,8 @@ class Trainer:
             # 途中再開
             log_df = pd.read_csv(self.output_path.joinpath("training_log.csv"))
             self.log = log_df.to_dict(orient="list")
-            self.best_metric = log_df["val_loss"].min()
+            # self.best_metric = log_df["val_loss"].min()
+            self.best_metric= log_df["val_cer"].min()
             
             # 読み込んだoptimizerのstateをGPUに渡す
             for state in self.optimizer.state.values():
@@ -142,9 +143,9 @@ class Trainer:
         epoch_val_cer = np.mean(iter_val_cer)
         self.log["val_cer"].append(epoch_val_cer)
         
-        # 最良のLossを判定
-        if self.best_metric > epoch_val_loss:
-            self.best_metric = epoch_val_loss
+        # 最良のCERを判定
+        if self.best_metric > epoch_val_cer:
+            self.best_metric = epoch_val_cer
             self.save_weight(model_name=f"model_best.pth")
             
         return epoch_val_loss, epoch_val_cer, 
