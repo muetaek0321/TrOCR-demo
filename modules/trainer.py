@@ -2,7 +2,6 @@ from pathlib import Path
 
 import torch
 from torch.optim import Optimizer
-from schedulefree import RAdamScheduleFree
 from torch.utils.data import DataLoader
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 import evaluate 
@@ -23,7 +22,7 @@ class Trainer:
     def __init__(
         self,
         model: VisionEncoderDecoderModel,
-        optimizer: Optimizer | RAdamScheduleFree,
+        optimizer: Optimizer,
         train_dataloader: DataLoader,
         val_dataloader: DataLoader,
         processor: TrOCRProcessor,
@@ -89,7 +88,6 @@ class Trainer:
         """訓練のループを実行
         """
         self.model.train()
-        self.optimizer.train()
         iter_train_loss = []
         
         for batch in tqdm(self.train_dataloader, desc="train"):                   
@@ -120,7 +118,6 @@ class Trainer:
         """検証のループを実行
         """
         self.model.eval()
-        self.optimizer.eval()
         iter_val_loss = []
         iter_val_cer = []
         
