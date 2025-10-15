@@ -7,6 +7,7 @@ import torch
 from torch.utils.data import Dataset
 from PIL import Image
 from transformers import TrOCRProcessor
+from datasets import Dataset as HFDataset
 
 from .augmentation import get_transform
 
@@ -19,14 +20,12 @@ class OCRDataset(Dataset):
     
     def __init__(
         self,
-        dataset_df: pd.DataFrame,
-        dataset_dir: Path | str,
+        dataset: HFDataset,
         processor: TrOCRProcessor,
         max_target_length: int = 128,
         phase: str = "test"
     ) -> None:
-        self.dataset_df = dataset_df
-        self.dataset_dir = Path(dataset_dir)
+        self.dataset = dataset
         self.processor = processor
         self.max_target_length = max_target_length
         self.phase = phase
@@ -34,23 +33,11 @@ class OCRDataset(Dataset):
         # DataAugmentationの準備
         self.tramsform = get_transform(phase)
         
-        # 学習時のみデータセット追加
-        if phase == "train":
-            self.load_additional_dataset()
-        
-    def load_additional_dataset(
-        self
-    ) -> None:
-        """データセットの追加読み込み
-        """
-        add_df = pd.read_csv("./add_dataset/annotations.csv", encoding="utf-8-sig")
-        self.dataset_df = pd.concat([self.dataset_df, add_df])
-        
     def __len__(
         self
     ) -> int:
         """Datasetの長さを返す"""
-        return len(self.dataset_df)
+        return len(self.dataset)
     
     def __getitem__(
         self, 
@@ -66,11 +53,7 @@ class OCRDataset(Dataset):
             list: アノテーション
         """
         # 画像とラベルを取得
-        data = self.dataset_df.iloc[index, :]
-        img_name, text = data["img"], data["text"]
-        
-        # 画像読み込み
-        img = Image.open(self.dataset_dir.joinpath(img_name)).convert("RGB")
+        img, text = self.dataset[index]
         
         # DataAugmentationの適用
         img = self.tramsform(image=np.array(img))["image"]
