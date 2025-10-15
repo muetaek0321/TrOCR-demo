@@ -53,7 +53,8 @@ class OCRDataset(Dataset):
             list: アノテーション
         """
         # 画像とラベルを取得
-        img, text = self.dataset[index]
+        data = self.dataset[index]
+        img, text = data["image"], data["string"]
         
         # DataAugmentationの適用
         img = self.tramsform(image=np.array(img))["image"]
